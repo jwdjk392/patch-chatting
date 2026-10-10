@@ -1,0 +1,38 @@
+{
+  "name": "patch-chatting",
+  "version": "1.0.0",
+  "description": "",
+  "homepage": "https://github.com/jwdjk392/patch-chatting#readme",
+  "bugs": {
+    "url": "https://github.com/jwdjk392/patch-chatting/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jwdjk392/patch-chatting.git"
+  },
+  "license": "ISC",
+  "author": "jwdjk392",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "tsx watch src/index.ts",
+    "copy-files": "cp -r src/public/. dist/public/",
+    "build": "tsc && npm run copy-files"
+  },
+  "dependencies": {
+    "dotenv": "^18.0.7",
+    "express": "^5.3.0",
+    "pino": "^10.4.0",
+    "pino-http": "^11.0.0",
+    "prisma": "^8.0.0-rc.22"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^26.6.5",
+    "pino-pretty": "^13.2.0",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.23.15",
+    "typescript": "^6.0.3"
+  }
+}
