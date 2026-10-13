@@ -21,11 +21,11 @@ describe("createAccountHandler", () => {
                 password: "password123"
             }
         } as Request;
-        res = {} as Response;
+        res = { redirect: vi.fn() } as unknown as Response;
     });
 
-    test("Calls createAccount", () => {
-        createAccountHandler(req, res);
+    test("Calls createAccount", async () => {
+        await createAccountHandler(req, res);
         expect(createAccount).toHaveBeenCalledExactlyOnceWith("test@example.com", "testuser", "Test User", "password123");
     });
 });

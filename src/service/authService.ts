@@ -1,5 +1,5 @@
 import { AppError, DbUniqueError } from "@lib/error";
-import { createAccountRecord } from "@repository/authDBHandler"
+import { createAccountRecord, findAccountByEmail } from "@repository/authDBHandler"
 import bcrypt from 'bcrypt';
 import validator from 'validator';
 async function createAccount(email: string, username: string, name: string, password: string) {
@@ -55,4 +55,33 @@ async function createAccount(email: string, username: string, name: string, pass
     }
 }
 
-export { createAccount }
+async function login(email: unknown, password: unknown) {
+    if (typeof email !== "string" || !validator.isEmail(email)) {
+        throw new AppError({
+            statusCode: 400,
+            code: "INVALID_EMAIL",
+            message: "Email is not in correct form."
+        });
+    }
+
+    if (typeof password !== "string" || password.length === 0) {
+        throw new AppError({
+            statusCode: 400,
+            code: "INVALID_PASSWORD",
+            message: "Password is required."
+        });
+    }
+
+    const user = await findAccountByEmail(email);
+    if (!user || !await bcrypt.compare(password, user.password)) {
+        throw new AppError({
+            statusCode: 401,
+            code: "INVALID_CREDENTIALS",
+            message: "Email or password is incorrect."
+        });
+    }
+
+    return user.id;
+}
+
+export { createAccount, login }

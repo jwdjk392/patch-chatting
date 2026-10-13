@@ -19,20 +19,20 @@ describe("authService.ts", () => {
     beforeEach(() => {
         vi.resetAllMocks();
     })
-    test("Calls createAccountRecord properly", () => {
+    test("Calls createAccountRecord properly", async () => {
         vi.mocked(bcrypt.hash).mockResolvedValue("hashed")
-        createAccount("test@test.com", "testuser", "Test User", "Password123!");
+        await createAccount("test@test.com", "testuser", "Test User", "Password123!");
         expect(createAccountRecord).toHaveBeenCalledExactlyOnceWith("test@test.com", "testuser", "Test User", "hashed");
     })
 
-    test("Calls hash with password", () => {
-        createAccount("test@test.com", "testuser", "Test User", "Password123!");
+    test("Calls hash with password", async () => {
+        await createAccount("test@test.com", "testuser", "Test User", "Password123!");
         expect(bcrypt.hash).toHaveBeenCalledExactlyOnceWith("Password123!", 10);
     })
 
-    test("Returns error when email is invalid", () => {
+    test("Returns error when email is invalid", async () => {
         try {
-            createAccount("absolutelynotemail", "testuser", "Test User", "Password123!");
+            await createAccount("absolutelynotemail", "testuser", "Test User", "Password123!");
             expect.fail("Expected createAccount to throw error");
         } catch (error) {
             expect(error).toBeInstanceOf(AppError);
@@ -44,9 +44,9 @@ describe("authService.ts", () => {
         }
     })
 
-    test("Returns error when password is not strong enough", () => {
+    test("Returns error when password is not strong enough", async () => {
         try {
-            createAccount("test@test.com", "testuser", "Test User", "weak");
+            await createAccount("test@test.com", "testuser", "Test User", "weak");
             expect.fail("Expected createAccount to throw error");
         } catch (error) {
             expect(error).toBeInstanceOf(AppError);
@@ -58,10 +58,10 @@ describe("authService.ts", () => {
         }
     })
 
-    test("Returns email unique error", () => {
-        vi.mocked(createAccountRecord).mockThrowOnce(new DbUniqueError("email", "EMAIL_EXISTS"))
+    test("Returns email unique error", async () => {
+        vi.mocked(createAccountRecord).mockRejectedValueOnce(new DbUniqueError("email", "EMAIL_EXISTS"))
         try {
-            createAccount("test@test.com", "testuser", "Test User", "Password123!");
+            await createAccount("test@test.com", "testuser", "Test User", "Password123!");
             expect.fail("Expected createAccount to throw error");
         } catch (error) {
             expect(error).toBeInstanceOf(AppError);
@@ -73,10 +73,10 @@ describe("authService.ts", () => {
         }
     })
 
-    test("Returns username unique error", () => {
-        vi.mocked(createAccountRecord).mockThrowOnce(new DbUniqueError("username", "USERNAME_EXISTS"))
+    test("Returns username unique error", async () => {
+        vi.mocked(createAccountRecord).mockRejectedValueOnce(new DbUniqueError("username", "USERNAME_EXISTS"))
         try {
-            createAccount("test@test.com", "testuser", "Test User", "Password123!");
+            await createAccount("test@test.com", "testuser", "Test User", "Password123!");
             expect.fail("Expected createAccount to throw error");
         } catch (error) {
             expect(error).toBeInstanceOf(AppError);

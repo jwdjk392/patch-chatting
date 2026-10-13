@@ -1,5 +1,5 @@
 import type { Request, Response } from 'express';
-import { createAccount } from '@service/authService';
+import { createAccount, login } from '@service/authService';
 
 /**
  * Controller: Hashes user's password, and calls account creation function.
@@ -15,4 +15,29 @@ async function createAccountHandler(req: Request, res: Response) {
     res.redirect("/");
 }
 
-export { createAccountHandler }
+async function loginHandler(req: Request, res: Response) {
+    const userId = await login(req.body?.email, req.body?.password);
+
+    await new Promise<void>((resolve, reject) => {
+        req.session.regenerate(error => error ? reject(error) : resolve());
+    });
+
+    req.session.userId = userId;
+    
+    await new Promise<void>((resolve, reject) => {
+        req.session.save(error => error ? reject(error) : resolve());
+    });
+
+    res.redirect("/");
+}
+
+async function logoutHandler(req: Request, res: Response) {
+    await new Promise<void>((resolve, reject) => {
+        req.session.destroy(error => error ? reject(error) : resolve());
+    });
+
+    res.clearCookie('connect.sid', { path: '/' });
+    res.redirect("/");
+}
+
+export { createAccountHandler, loginHandler, logoutHandler }
