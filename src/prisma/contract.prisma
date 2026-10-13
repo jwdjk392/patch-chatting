@@ -1,0 +1,44 @@
+// use prisma-8
+
+model User {
+  id        String      @id @default(uuid())
+  email     String   @unique
+  username  String   @unique
+  name      String?
+  password  String
+  createdAt TimestamptzString @default(now())
+  updatedAt temporal.updatedAtString()
+  roomMembers RoomMember[]
+  message Message[]
+}
+
+model Room {
+  id  String @id @default(uuid())
+  createdAt TimestamptzString @default(now())
+  name String
+  members RoomMember[]
+  message Message[]
+}
+
+model RoomMember {
+  roomId String
+  userId String
+  joinedAt TimestamptzString @default(now())
+  lastReadMessageId Int?
+  room Room @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@id([roomId, userId])
+  @@index([userId])
+}
+
+model Message {
+  id Int @id @default(autoincrement())
+  roomId String
+  senderId String?
+  text String
+  sentAt TimestamptzString @default(now())
+
+  room Room @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  sender User? @relation(fields: [senderId], references: [id], onDelete: SetNull)
+  @@index([roomId, id])
+}

@@ -15,24 +15,32 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "vitest",
     "dev": "tsx watch src/index.ts",
     "copy-files": "cp -r src/public/. dist/public/",
-    "build": "tsc && npm run copy-files"
+    "build": "tsc && npm run copy-files",
+    "contract:emit": "prisma contract emit"
   },
   "dependencies": {
+    "@prisma/orm-postgres": "^8.0.0-rc.17",
+    "bcrypt": "^6.0.0",
+    "body-parser": "^2.3.0",
     "dotenv": "^18.0.7",
     "express": "^5.3.0",
     "pino": "^10.4.0",
-    "pino-http": "^11.0.0",
-    "prisma": "^8.0.0-rc.22"
+    "pino-http": "^11.0.0"
   },
   "devDependencies": {
+    "@prisma/cli-engine": "^0.7.0",
+    "@types/bcrypt": "^6.0.0",
+    "@types/body-parser": "^1.19.6",
     "@types/express": "^5.0.6",
     "@types/node": "^26.6.5",
     "pino-pretty": "^13.2.0",
+    "prisma": "^8.0.0-rc.22",
     "ts-node": "^10.9.2",
     "tsx": "^4.23.15",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "vitest": "^5.0.4"
   }
 }
