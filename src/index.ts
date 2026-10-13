@@ -20,6 +20,7 @@ import { setupSocketController } from '@controller/socketController';
 const port = process.env.PORT ?? 80
 
 const app = express();
+app.set("trust proxy", 1); // Needed for render
 app.set("view engine", "ejs");
 app.set("views", path.join(import.meta.dirname, "views"));
 const sessionSecret = process.env.SESSION_SECRET;
