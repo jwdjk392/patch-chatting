@@ -1,10 +1,10 @@
 <% const isSignup = mode === 'signup'; %>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= isSignup ? 'Sign up' : 'Log in' %> · <%= siteName %></title>
+    <title><%= isSignup ? '회원가입' : '로그인' %> · <%= siteName %></title>
     <link rel="stylesheet" href="/css/home.css">
     <link rel="stylesheet" href="/css/auth.css">
     <script src="/js/vendor/validator.min.js" defer></script>
@@ -14,46 +14,46 @@
     <div class="auth-page">
         <header class="landing-header">
             <a class="brand" href="/"><span class="brand-icon" aria-hidden="true">◌</span><%= siteName %></a>
-            <a class="back-link" href="/">Back to home <span aria-hidden="true">↗</span></a>
+            <a class="back-link" href="/">홈으로 <span aria-hidden="true">↗</span></a>
         </header>
         <main class="auth-main">
             <section class="auth-card" aria-labelledby="auth-title">
-                <p class="eyebrow"><%= isSignup ? 'Your next conversation starts here' : 'A familiar little corner' %></p>
-                <h1 id="auth-title"><%= isSignup ? 'Make yourself at home.' : 'Welcome back.' %></h1>
-                <p class="auth-description"><%= isSignup ? 'Create an account and find your people on ' : 'Log in to catch up with your people on ' %><%= siteName %>.</p>
+                <p class="eyebrow"><%= isSignup ? '새로운 대화가 시작되는 곳' : '언제나 편안한 우리만의 공간' %></p>
+                <h1 id="auth-title"><%= isSignup ? '편하게 머물러 보세요.' : '다시 만나 반가워요.' %></h1>
+                <p class="auth-description"><%= siteName %>에서 <%= isSignup ? '계정을 만들고 소중한 사람들과 만나 보세요.' : '로그인하고 소중한 사람들과 이야기를 나눠 보세요.' %></p>
                 <form id="auth-form" method="post" action="<%= isSignup ? '/api/auth/create-account' : '/api/auth/login' %>" data-mode="<%= mode %>" data-password-rules="<%= JSON.stringify(passwordRules) %>">
                     <div id="form-error" class="form-error" role="alert" tabindex="-1" hidden></div>
                     <% if (isSignup) { %>
                         <div class="form-field">
-                            <label for="name">Display name <span class="optional">(optional)</span></label>
-                            <input id="name" name="name" type="text" autocomplete="name" placeholder="What should we call you?">
+                            <label for="name">표시 이름 <span class="optional">(선택)</span></label>
+                            <input id="name" name="name" type="text" autocomplete="name" placeholder="어떤 이름으로 불러 드릴까요?">
                         </div>
                         <div class="form-field">
-                            <label for="username">Username</label>
-                            <input id="username" name="username" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" required aria-describedby="username-error" placeholder="Your unique username">
+                            <label for="username">사용자 아이디</label>
+                            <input id="username" name="username" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" required aria-describedby="username-error" placeholder="사용할 아이디를 입력하세요">
                             <p id="username-error" class="field-error" hidden></p>
                         </div>
                     <% } %>
                     <div class="form-field">
-                        <label for="email">Email</label>
+                        <label for="email">이메일</label>
                         <input id="email" name="email" type="email" autocomplete="<%= isSignup ? 'email' : 'username' %>" autocapitalize="none" spellcheck="false" required aria-describedby="email-error" placeholder="you@example.com">
                         <p id="email-error" class="field-error" hidden></p>
                     </div>
                     <div class="form-field">
-                        <label for="password">Password</label>
+                        <label for="password">비밀번호</label>
                         <input id="password" name="password" type="password" autocomplete="<%= isSignup ? 'new-password' : 'current-password' %>" required <% if (isSignup) { %>minlength="<%= passwordRules.minLength %>"<% } %> aria-describedby="<%= isSignup ? 'password-help password-strength password-error' : 'password-error' %>">
                         <% if (isSignup) { %>
-                            <p id="password-help" class="field-hint">Use at least <%= passwordRules.minLength %> characters, including a lowercase letter, an uppercase letter, a number, and a symbol (such as !, @, or #).</p>
+                            <p id="password-help" class="field-hint">영문 소문자와 대문자, 숫자, 특수문자(예: !, @, #)를 포함해 <%= passwordRules.minLength %>자 이상 입력하세요.</p>
                             <p id="password-strength" class="password-strength" role="status" aria-live="polite"></p>
                         <% } %>
                         <p id="password-error" class="field-error" hidden></p>
                     </div>
-                    <button class="button button-primary auth-submit" type="submit"><%= isSignup ? 'Create account' : 'Log in' %><span aria-hidden="true">↗</span></button>
+                    <button class="button button-primary auth-submit" type="submit"><%= isSignup ? '회원가입' : '로그인' %><span aria-hidden="true">↗</span></button>
                 </form>
-                <p class="auth-switch"><%= isSignup ? 'Already have an account?' : 'New here?' %> <a href="<%= isSignup ? '/login' : '/signup' %>"><%= isSignup ? 'Log in' : 'Create an account' %></a></p>
+                <p class="auth-switch"><%= isSignup ? '이미 계정이 있으신가요?' : '처음 오셨나요?' %> <a href="<%= isSignup ? '/login' : '/signup' %>"><%= isSignup ? '로그인' : '회원가입' %></a></p>
             </section>
         </main>
-        <footer class="landing-footer"><%= siteName %><span>Small moments. Real connections.</span></footer>
+        <footer class="landing-footer"><%= siteName %><span>작은 순간이 만드는 진심 어린 만남.</span></footer>
     </div>
 </body>
 </html>

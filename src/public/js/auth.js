@@ -1,4 +1,5 @@
 import { validateAuth } from './auth-validation.js';
+import { getAuthErrorMessage } from './auth-messages.js';
 
 const form = document.getElementById('auth-form');
 const validator = window.validator;
@@ -41,7 +42,7 @@ if (form && validator) {
         const password = form.elements.namedItem('password').value;
         const valid = validator.isStrongPassword(password, passwordRules);
         strength.dataset.valid = String(valid);
-        strength.textContent = !password ? '' : valid ? 'Password meets all requirements.' : 'Add the required characters to strengthen your password.';
+        strength.textContent = !password ? '' : valid ? '비밀번호가 모든 조건을 충족해요.' : '안내된 문자 종류를 포함해 안전한 비밀번호를 만들어 주세요.';
     }
 
     for (const name of fields) {
@@ -89,9 +90,9 @@ if (form && validator) {
                 return;
             }
             const payload = await response.json().catch(() => null);
-            showFormError(payload?.error?.message || 'Something went wrong. Please try again.');
+            showFormError(getAuthErrorMessage(payload?.error?.code, mode));
         } catch {
-            showFormError('Could not connect. Check your connection and try again.');
+            showFormError('연결할 수 없어요. 인터넷 연결을 확인하고 다시 시도해 주세요.');
         } finally {
             submitting = false;
             submit.disabled = false;

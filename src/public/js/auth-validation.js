@@ -2,15 +2,15 @@
 export function validateAuth(values, mode, validator, passwordRules) {
     const errors = {};
     if (mode === 'signup' && !values.username) {
-        errors.username = 'Enter a username.';
+        errors.username = '사용자 아이디를 입력하세요.';
     }
     if (!validator.isEmail(values.email)) {
-        errors.email = 'Enter a valid email address.';
+        errors.email = '올바른 이메일 주소를 입력하세요.';
     }
     if (!values.password) {
-        errors.password = 'Enter your password.';
+        errors.password = '비밀번호를 입력하세요.';
     } else if (mode === 'signup' && !validator.isStrongPassword(values.password, passwordRules)) {
-        errors.password = 'Your password does not meet the listed requirements.';
+        errors.password = '비밀번호가 안내된 조건을 충족하지 않아요.';
     }
     return errors;
 }

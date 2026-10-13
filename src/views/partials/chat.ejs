@@ -6,28 +6,28 @@
             <div class="account-dropdown">
                 <p class="dropdown-name"><%= user.name %></p>
                 <p class="username">@<%= user.username %></p>
-                <a class="signout" href="/api/auth/logout">Sign out <span aria-hidden="true">↗</span></a>
+                <a class="signout" href="/api/auth/logout">로그아웃 <span aria-hidden="true">↗</span></a>
             </div>
         </details>
     </header>
     <div class="chat-layout">
-        <aside class="sidebar" aria-label="Conversations">
-            <div class="sidebar-heading"><h2>Messages</h2><span class="count">0</span></div>
-            <div class="conversation-placeholder"><span class="empty-icon" aria-hidden="true">☏</span><h3>A quiet moment</h3><p>Your conversations will appear here.</p></div>
-            <div class="sidebar-user"><span class="status-dot" aria-hidden="true"></span> Signed in as <strong><%= user.name %></strong></div>
+        <aside class="sidebar" aria-label="대화 목록">
+            <div class="sidebar-heading"><h2>메시지</h2><span class="count">0</span></div>
+            <div class="conversation-placeholder"><span class="empty-icon" aria-hidden="true">☏</span><h3>아직 대화가 없어요</h3><p>대화 목록이 여기에 표시돼요.</p></div>
+            <div class="sidebar-user"><span class="status-dot" aria-hidden="true"></span> <strong><%= user.name %></strong> 님으로 로그인 중</div>
         </aside>
         <main class="chat-main">
-            <header class="conversation-header"><h1>Your space to chat</h1><p>A good conversation starts with hello.</p></header>
-            <section class="chat-empty" aria-label="No conversation selected">
+            <header class="conversation-header"><h1>우리만의 대화 공간</h1><p>반가운 인사로 대화를 시작해 보세요.</p></header>
+            <section class="chat-empty" aria-label="선택한 대화 없음">
                 <div class="welcome-icon" aria-hidden="true">◌</div>
-                <p class="eyebrow">Make yourself at home</p>
-                <h2>Hello, <%= user.name %>.</h2>
-                <p>This is where you’ll catch up, share ideas, and stay connected.<br>Select a conversation when one is available.</p>
+                <p class="eyebrow">편하게 머물러 보세요</p>
+                <h2>안녕하세요, <%= user.name %> 님.</h2>
+                <p>이곳에서 안부를 묻고 생각을 나누며 소중한 인연을 이어 가세요.<br>대화 목록에서 이야기를 나눌 대화를 선택해 주세요.</p>
             </section>
             <div class="composer">
-                <label class="sr-only" for="message">Message</label>
-                <textarea id="message" rows="1" placeholder="Select a conversation to start chatting" disabled></textarea>
-                <button class="send-button" type="button" disabled aria-label="Send message">↑</button>
+                <label class="sr-only" for="message">메시지</label>
+                <textarea id="message" rows="1" placeholder="대화를 선택하고 이야기를 시작하세요" disabled></textarea>
+                <button class="send-button" type="button" disabled aria-label="메시지 보내기">↑</button>
             </div>
         </main>
     </div>
