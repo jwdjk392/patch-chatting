@@ -5,6 +5,7 @@ import authRouter from '@router/authRouter'
 import bodyParser from 'body-parser';
 
 import 'dotenv/config';
+import { apiErrorHandler } from '@controller/apiErrorMiddleware';
 
 const port = process.env.PORT ?? 80
 
@@ -18,5 +19,6 @@ app.use(bodyParser.urlencoded({ extended: true}))
 app.use(express.static("./public"));
 
 app.use("/api/auth", authRouter);
+app.use("/api", apiErrorHandler);
 
 app.listen(port, () => logger.info("Server running @ " + port));

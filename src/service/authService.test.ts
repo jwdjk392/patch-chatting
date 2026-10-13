@@ -9,7 +9,7 @@ vi.mock("@repository/authDBHandler", () => ({
 
 vi.mock("bcrypt", () => ({
     default: {
-        hashSync: vi.fn()
+        hash: vi.fn()
     }
 }))
 
@@ -20,14 +20,14 @@ describe("authService.ts", () => {
         vi.resetAllMocks();
     })
     test("Calls createAccountRecord properly", () => {
-        vi.mocked(bcrypt.hashSync).mockReturnValue("hashed")
+        vi.mocked(bcrypt.hash).mockResolvedValue("hashed")
         createAccount("test@test.com", "testuser", "Test User", "Password123!");
         expect(createAccountRecord).toHaveBeenCalledExactlyOnceWith("test@test.com", "testuser", "Test User", "hashed");
     })
 
-    test("Calls hashSync with password", () => {
+    test("Calls hash with password", () => {
         createAccount("test@test.com", "testuser", "Test User", "Password123!");
-        expect(bcrypt.hashSync).toHaveBeenCalledExactlyOnceWith("Password123!", 10);
+        expect(bcrypt.hash).toHaveBeenCalledExactlyOnceWith("Password123!", 10);
     })
 
     test("Returns error when email is invalid", () => {

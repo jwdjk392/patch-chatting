@@ -3,7 +3,7 @@ import { AppError } from "@lib/error";
 import { logger } from "@lib/logger";
 
 
-export const errorHandler: ErrorRequestHandler = (
+export const apiErrorHandler: ErrorRequestHandler = (
   err: unknown,
   req,
   res,

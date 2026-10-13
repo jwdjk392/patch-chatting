@@ -10,8 +10,9 @@ import { createAccount } from '@service/authService';
  * @param req Request
  * @param res Response
  */
-function createAccountHandler(req: Request, res: Response) {
-    createAccount(req.body.email, req.body.username, req.body.name, req.body.password);
+async function createAccountHandler(req: Request, res: Response) {
+    await createAccount(req.body.email, req.body.username, req.body.name, req.body.password);
+    res.redirect("/");
 }
 
 export { createAccountHandler }

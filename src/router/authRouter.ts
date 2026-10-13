@@ -3,6 +3,6 @@ import { createAccountHandler } from "@controller/authController";
 
 const router = Router();
 
-router.get("/create-account", createAccountHandler);
+router.post("/create-account", createAccountHandler);
 
 export default router;

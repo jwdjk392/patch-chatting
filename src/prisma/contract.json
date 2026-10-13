@@ -320,7 +320,7 @@
                 }
               },
               "username": {
-                "nullable": true,
+                "nullable": false,
                 "type": {
                   "codecId": "pg/text@1",
                   "kind": "scalar"
@@ -673,7 +673,7 @@
                 "username": {
                   "codecId": "pg/text@1",
                   "dataType": "pg/text",
-                  "nullable": true
+                  "nullable": false
                 }
               },
               "foreignKeys": [],
@@ -688,6 +688,11 @@
                   "columns": [
                     "email"
                   ]
+                },
+                {
+                  "columns": [
+                    "username"
+                  ]
                 }
               ]
             }
@@ -697,7 +702,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "a70b3931d5babe821d208b2d5ad7712b3cb261b77b98696c1bfd244635d23ce3"
+    "storageHash": "ed5d2283b4330df15c642d58a6fe42adcc031107ca77b8476908c77eb3991e83"
   },
   "execution": {
     "executionHash": "a35caa70ea41497558854702763bb83773f08d788203c8d80d2725e05e7a2555",
