@@ -22,9 +22,13 @@
     <div id="connection-status" class="connection-status" data-state="connecting" role="status" aria-live="polite" aria-atomic="true">서버 연결 중…</div>
     <div class="chat-layout">
         <aside class="sidebar" aria-label="대화 목록">
-            <div class="sidebar-heading"><h2>메시지</h2><span id="room-count" class="count">…</span></div>
+            <div class="sidebar-heading">
+                <h2>메시지</h2>
+                <span class="room-loading-slot"><span id="room-loading" role="status"><span class="room-spinner" aria-hidden="true"></span><span class="sr-only">대화방을 불러오는 중…</span></span></span>
+                <span id="room-count" class="count">…</span>
+            </div>
             <button id="new-room" class="button button-primary" type="button">새 대화방 만들기</button>
-            <p id="room-list-status" role="status" aria-live="polite">대화방을 불러오는 중…</p>
+            <p id="room-list-status" role="status" aria-live="polite"></p>
             <button id="retry-rooms" class="button button-secondary" type="button" hidden>다시 불러오기</button>
             <ul id="room-list" class="room-list" aria-label="참여 중인 대화방" aria-busy="true"></ul>
             <div id="rooms-empty" class="conversation-placeholder" hidden><span class="empty-icon" aria-hidden="true">☏</span><h3>아직 대화가 없어요</h3><p>새 대화방을 만들어 보세요.</p></div>

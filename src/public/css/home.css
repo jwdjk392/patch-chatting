@@ -75,6 +75,11 @@ a:focus-visible, summary:focus-visible, button:focus-visible { outline: 3px soli
 .sidebar { display: flex; flex-direction: column; background: #f4f6f0; border-right: 1px solid var(--line); padding: 27px 22px 20px; }
 .sidebar-heading { display: flex; align-items: center; justify-content: space-between; }
 .sidebar-heading h2 { font-size: 15px; margin: 0; }
+.room-loading-slot { width: 16px; height: 16px; flex-shrink: 0; margin: 0 auto 0 8px; }
+.room-spinner { display: block; width: 16px; height: 16px; border: 2px solid var(--line); border-top-color: var(--green); border-radius: 50%; animation: room-spin .8s linear infinite; }
+#room-list-status:empty { display: none; }
+@keyframes room-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .room-spinner { animation: none; } }
 .count { font-size: 10px; background: #e6ebe1; padding: 3px 7px; border-radius: 6px; }
 .conversation-placeholder { text-align: center; padding: 65px 10px; color: var(--muted); }
 .empty-icon { font-size: 25px; }

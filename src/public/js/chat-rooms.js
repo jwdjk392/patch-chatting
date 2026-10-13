@@ -10,6 +10,7 @@
     const roomList = document.getElementById('room-list');
     const roomCount = document.getElementById('room-count');
     const roomStatus = document.getElementById('room-list-status');
+    const roomLoading = document.getElementById('room-loading');
     const roomsEmpty = document.getElementById('rooms-empty');
     const retryRooms = document.getElementById('retry-rooms');
     let listVersion = 0;
@@ -32,9 +33,9 @@
         clearTimeout(refreshTimer);
         const current = ++listVersion;
         roomList.setAttribute('aria-busy', 'true');
-        roomStatus.textContent = '대화방을 불러오는 중…';
+        roomLoading.hidden = false;
+        roomStatus.textContent = '';
         retryRooms.hidden = true;
-        roomsEmpty.hidden = true;
         try {
             const { rooms } = await jsonRequest('/api/chat-rooms');
             if (current !== listVersion) return;
@@ -72,7 +73,10 @@
             roomStatus.textContent = `대화방 목록을 불러오지 못했습니다. ${failure.message}`;
             retryRooms.hidden = false;
         } finally {
-            if (current === listVersion) roomList.setAttribute('aria-busy', 'false');
+            if (current === listVersion) {
+                roomList.setAttribute('aria-busy', 'false');
+                roomLoading.hidden = true;
+            }
         }
     }
 
