@@ -13,6 +13,8 @@
     const roomsEmpty = document.getElementById('rooms-empty');
     const retryRooms = document.getElementById('retry-rooms');
     let listVersion = 0;
+    let activeRoomId;
+    let refreshTimer;
     const selected = new Map();
     let timer;
     let version = 0;
@@ -27,6 +29,7 @@
     }
 
     async function loadRooms() {
+        clearTimeout(refreshTimer);
         const current = ++listVersion;
         roomList.setAttribute('aria-busy', 'true');
         roomStatus.textContent = '대화방을 불러오는 중…';
@@ -38,19 +41,32 @@
             const cards = rooms.map((room) => {
                 const card = document.createElement('li');
                 card.className = 'room-card';
-                const title = document.createElement('h3');
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'room-open';
+                button.setAttribute('aria-pressed', String(room.id === activeRoomId));
+                button.addEventListener('click', () => document.dispatchEvent(new CustomEvent('chat:select', { detail: room })));
+                const title = document.createElement('strong');
                 title.textContent = room.name;
                 const members = document.createElement('p');
                 members.textContent = room.members.map(({ user }) => user.name?.trim() || user.username).join(', ');
                 const count = document.createElement('span');
                 count.textContent = `${room.members.length}명 참여 중`;
-                card.append(title, members, count);
+                const unread = document.createElement('span');
+                unread.className = 'unread-badge';
+                unread.hidden = !room.unreadCount;
+                unread.textContent = String(room.unreadCount || 0);
+                unread.setAttribute('aria-label', `읽지 않은 메시지 ${room.unreadCount || 0}개`);
+                button.append(title, members, count, unread);
+                card.append(button);
+                card.roomId = room.id;
                 return card;
             });
             roomList.replaceChildren(...cards);
             roomCount.textContent = String(rooms.length);
             roomsEmpty.hidden = rooms.length !== 0;
             roomStatus.textContent = '';
+            return rooms;
         } catch (failure) {
             if (current !== listVersion) return;
             roomStatus.textContent = `대화방 목록을 불러오지 못했습니다. ${failure.message}`;
@@ -60,6 +76,32 @@
         }
     }
 
+    function refreshRooms() {
+        // Invalidate responses that started before the event; coalesce bursts.
+        listVersion++;
+        clearTimeout(refreshTimer);
+        refreshTimer = setTimeout(loadRooms, 150);
+    }
+    document.addEventListener('chat:select', (event) => {
+        activeRoomId = event.detail.id;
+        for (const card of roomList.children) {
+            card.children[0].setAttribute('aria-pressed', String(card.roomId === activeRoomId));
+        }
+    });
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) refreshRooms();
+    });
+    const client = document.chatClient;
+    if (client) {
+        client.socket.on('message:new', refreshRooms);
+        client.socket.on('room:read', refreshRooms);
+        let wasReady = client.isReady();
+        client.onRoomsStatus = () => {
+            const ready = client.isReady();
+            if (ready && !wasReady) refreshRooms();
+            wasReady = ready;
+        };
+    }
     retryRooms.addEventListener('click', loadRooms);
     loadRooms();
 
@@ -116,11 +158,13 @@
         if (!selected.size) { error.textContent = '함께할 사용자를 선택해 주세요.'; return; }
         submit.disabled = true;
         error.textContent = '';
+        let createdRoom;
         try {
-            await jsonRequest('/api/chat-rooms', {
+            const data = await jsonRequest('/api/chat-rooms', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name: document.getElementById('room-name').value.trim(), participantIds: [...selected.keys()] }),
             });
+            createdRoom = data.room;
         } catch (failure) {
             error.textContent = failure.message;
             return;
@@ -137,6 +181,8 @@
         matches = [];
         renderUsers();
         status.textContent = '';
-        await loadRooms();
+        const rooms = await loadRooms();
+        const created = rooms?.find((room) => room.id === createdRoom.id);
+        if (created) document.dispatchEvent(new CustomEvent('chat:select', { detail: created }));
     });
 })();

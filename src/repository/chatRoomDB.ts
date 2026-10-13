@@ -1,13 +1,26 @@
+import { or } from '@prisma/orm-postgres/orm-client';
 import { db } from '@prisma/db';
 import { AppError } from '@lib/error';
 
 export async function listChatRooms(userId: string) {
-    return db.orm.public.Room
+    const rooms = await db.orm.public.Room
         .where((room) => room.members.some((member) => member.userId.eq(userId)))
         .select('id', 'name', 'createdAt')
-        .include('members', (members) => members.select('userId')
+        .include('members', (members) => members.select('userId', 'lastReadMessageId')
             .include('user', (user) => user.select('id', 'username', 'name')))
         .orderBy((room) => room.createdAt.desc()).all();
+    return Promise.all(rooms.map(async (room) => {
+        const lastReadMessageId = room.members.find((member) => member.userId === userId)!.lastReadMessageId;
+        const { unreadCount } = await db.orm.public.Message.where({ roomId: room.id })
+            .where((message) => message.id.gt(lastReadMessageId ?? 0))
+            .where((message) => or(message.senderId.isNull(), message.senderId.neq(userId)))
+            .aggregate((aggregate) => ({ unreadCount: aggregate.count() }));
+        return {
+            ...room,
+            members: room.members.map(({ userId, user }) => ({ userId, user })),
+            lastReadMessageId, unreadCount,
+        };
+    }));
 }
 
 export async function createChatRoom(creatorId: string, name: string, participantIds: string[]) {

@@ -1,8 +1,10 @@
+import { listMessages } from '@repository/messageDB';
 import type { Request, Response } from 'express';
 import { createChatRoom, listChatRooms } from '@repository/chatRoomDB';
 import { AppError } from '@lib/error';
 
 export async function listChatRoomsHandler(req: Request, res: Response) {
+    res.setHeader("Cache-Control", "no-store");
     res.json({ rooms: await listChatRooms(req.session.userId!) });
 }
 
@@ -22,4 +24,9 @@ export async function createChatRoomHandler(req: Request, res: Response) {
     }
     const room = await createChatRoom(req.session.userId!, name.trim(), participantIds);
     res.status(201).json({ room });
+}
+
+export async function listMessagesHandler(req: Request, res: Response) {
+    res.setHeader("Cache-Control", "no-store");
+    res.json({ messages: await listMessages(req.session.userId!, req.params.roomId as string) });
 }

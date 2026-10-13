@@ -22,19 +22,35 @@ class Element {
 let elements: Record<string, Element>;
 let request: ReturnType<typeof vi.fn>;
 let reload: ReturnType<typeof vi.fn>;
+let documentHandlers: Record<string, (...args: any[]) => any>;
+let socketHandlers: Record<string, (...args: any[]) => any>;
+let client: any;
 const el = (id: string) => elements[id] ??= new Element();
 const reply = (data: unknown) => ({ ok: true, json: async () => data });
 const room = { name: '<img src=x onerror=alert(1)>', members: [{ user: { name: 'Bob', username: 'bob' } }] };
 const flush = async () => { for (let i = 0; i < 20; i++) await Promise.resolve(); };
 function start() {
     runInNewContext(script, {
-        document: { getElementById: el, createElement: () => new Element() },
+        document: {
+            getElementById: el, createElement: () => new Element(), chatClient: client,
+            addEventListener: (event: string, handler: (...args: any[]) => any) => { documentHandlers[event] = handler; },
+            dispatchEvent: (event: any) => documentHandlers[event.type]?.(event),
+        },
+        CustomEvent: class {
+            detail: unknown;
+            constructor(public type: string, options: { detail: unknown }) { this.detail = options.detail; }
+        },
         fetch: request, location: { reload }, AbortController, setTimeout, clearTimeout,
     });
 }
 beforeEach(() => {
     vi.useFakeTimers();
     elements = {};
+    documentHandlers = {};
+    socketHandlers = {};
+    client = { isReady: vi.fn(() => true), socket: {
+        on: (event: string, handler: (...args: any[]) => any) => { socketHandlers[event] = handler; },
+    } };
     request = vi.fn();
     reload = vi.fn();
 });
@@ -46,7 +62,7 @@ test('loads rooms through the API and renders names as text', async () => {
     expect(el('room-list').attributes['aria-busy']).toBe('true');
     await flush();
     expect(request).toHaveBeenCalledWith('/api/chat-rooms', expect.objectContaining({ cache: 'no-store' }));
-    expect(el('room-list').children[0]?.children[0]?.textContent).toBe(room.name);
+    expect(el('room-list').children[0]?.children[0]?.children[0]?.textContent).toBe(room.name);
     expect(el('room-count').textContent).toBe('1');
     expect(el('rooms-empty').hidden).toBe(true);
 });
@@ -85,4 +101,42 @@ test.each([false, true])('creation updates without reload; refresh failure=%s', 
     if (failRefresh) expect(el('retry-rooms').hidden).toBe(false);
     else expect(el('room-count').textContent).toBe('1');
     expect(request.mock.calls.filter(([, options]) => options.method === 'POST')).toHaveLength(1);
+});
+
+test('renders unread counts and makes the whole room card a selection button', async () => {
+    request.mockResolvedValue(reply({ rooms: [{ ...room, id: 'room', unreadCount: 3, lastReadMessageId: 5 }] }));
+    start();
+    await flush();
+    const button = el('room-list').children[0]!.children[0]!;
+    expect(button.attributes['aria-pressed']).toBe('false');
+    expect(button.children[3]!.textContent).toBe('3');
+    expect(button.children[3]!.hidden).toBe(false);
+    expect(button.children[3]!.attributes['aria-label']).toContain('3');
+    button.handlers.click!();
+    expect(button.attributes['aria-pressed']).toBe('true');
+    expect(button.children[3]!.textContent).toBe('3'); // Selecting alone cannot clear unsaved unread counts.
+});
+
+test('new messages and read acknowledgements refresh persisted unread counts and retain selection', async () => {
+    request.mockResolvedValue(reply({ rooms: [{ ...room, id: 'room', unreadCount: 2 }] }));
+    start();
+    await flush();
+    el('room-list').children[0]!.children[0]!.handlers.click!();
+    request.mockResolvedValue(reply({ rooms: [{ ...room, id: 'room', unreadCount: 3 }] }));
+    socketHandlers['message:new']!();
+    socketHandlers['message:new']!();
+    await vi.advanceTimersByTimeAsync(150);
+    expect(request).toHaveBeenCalledTimes(2);
+    expect(el('room-list').children[0]!.children[0]!.children[3]!.textContent).toBe('3');
+    expect(el('room-list').children[0]!.children[0]!.attributes['aria-pressed']).toBe('true');
+    request.mockResolvedValue(reply({ rooms: [{ ...room, id: 'room', unreadCount: 0 }] }));
+    socketHandlers['room:read']!();
+    await vi.advanceTimersByTimeAsync(150);
+    expect(el('room-list').children[0]!.children[0]!.children[3]!.hidden).toBe(true);
+    client.isReady.mockReturnValue(false);
+    client.onRoomsStatus();
+    client.isReady.mockReturnValue(true);
+    client.onRoomsStatus();
+    await vi.advanceTimersByTimeAsync(150);
+    expect(request).toHaveBeenCalledTimes(4);
 });

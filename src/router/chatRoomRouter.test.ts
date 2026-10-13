@@ -6,10 +6,13 @@ import userRouter from './userRouter';
 import { apiErrorHandler } from '@middleware/apiErrorMiddleware';
 import { findAccountById } from '@repository/authDBHandler';
 import { createChatRoom, listChatRooms } from '@repository/chatRoomDB';
+import { listMessages } from '@repository/messageDB';
+import { AppError } from '@lib/error';
 import { searchUsers } from '@repository/userDB';
 
 vi.mock('@repository/authDBHandler', () => ({ findAccountById: vi.fn() }));
 vi.mock('@repository/chatRoomDB', () => ({ createChatRoom: vi.fn(), listChatRooms: vi.fn() }));
+vi.mock('@repository/messageDB', () => ({ listMessages: vi.fn() }));
 vi.mock('@repository/userDB', () => ({ searchUsers: vi.fn() }));
 let server: Server;
 let base: string;
@@ -74,4 +77,17 @@ test('creates with the session creator and returns the persisted room', async ()
     expect(response.status).toBe(201);
     expect(createChatRoom).toHaveBeenCalledExactlyOnceWith('alice', 'Friends', ['bob']);
     expect(await response.json()).toMatchObject({ room: { id: 'room-1' } });
+});
+
+test('history requires login and uses the session identity', async () => {
+    expect((await fetch(`${base}/room/messages`)).status).toBe(401);
+    expect(listMessages).not.toHaveBeenCalled();
+    vi.mocked(listMessages).mockResolvedValue([]);
+    const response = await fetch(`${base}/room/messages?userId=bob`, { headers });
+    expect(response.status).toBe(200);
+    expect(response.headers.get('cache-control')).toBe('no-store');
+    expect(await response.json()).toEqual({ messages: [] });
+    expect(listMessages).toHaveBeenCalledExactlyOnceWith('alice', 'room');
+    vi.mocked(listMessages).mockRejectedValue(new AppError({ statusCode: 403, code: 'NOT_ROOM_MEMBER' }));
+    expect((await fetch(`${base}/room/messages`, { headers })).status).toBe(403);
 });

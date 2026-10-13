@@ -96,3 +96,23 @@ a:focus-visible, summary:focus-visible, button:focus-visible { outline: 3px soli
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
 @media (max-width: 900px) { .landing { padding: 0 30px; } .hero { gap: 35px; } .chat-layout { grid-template-columns: 220px minmax(0, 1fr); } }
 @media (max-width: 640px) { .landing { padding: 0 24px; } .landing-header { padding: 24px 0; } .header-note { display: none; } .hero { grid-template-columns: 1fr; padding: 32px 0 55px; gap: 50px; } .hero h1 { letter-spacing: -1.5px; } .preview { transform: none; } .landing-footer { flex-direction: column; gap: 8px; } .chat-header { padding: 16px; } .chat-header .brand { font-size: 16px; } .account-name { max-width: 95px; } .chat-layout { grid-template-columns: 1fr; } .sidebar { border-right: 0; border-bottom: 1px solid var(--line); padding: 16px 20px; } .conversation-placeholder, .sidebar-user { display: none; } .chat-main { min-height: calc(100svh - 129px); } .conversation-header { padding: 20px; } .composer { margin: 0 16px 20px; } }
+
+.chat-empty[hidden], .messages[hidden] { display: none; }
+.messages { flex: 1; list-style: none; padding: 24px 32px; margin: 0; max-height: 60svh; overflow-y: auto; }
+.messages li { padding: 12px 0; border-bottom: 1px solid var(--line); overflow-wrap: anywhere; }
+.messages p { white-space: pre-wrap; margin: 8px 0; }
+.messages time { font-size: 12px; color: var(--muted); }
+#message-status { margin: 12px 32px; }
+.room-card > button { background: none; border: 0; padding: 0; font: inherit; text-align: left; cursor: pointer; color: inherit; }
+
+.room-card { padding: 0; }
+.room-card > .room-open { width: 100%; display: block; padding: 16px; border-radius: 10px; }
+.room-open:hover, .room-open[aria-pressed="true"] { background: #eef4ed; }
+.room-open:focus-visible { outline: 2px solid #46674b; outline-offset: 2px; }
+.room-card .unread-badge { display: inline-block; margin-left: 8px; min-width: 22px; padding: 2px 6px; border-radius: 12px; background: #365b40; color: white; text-align: center; font-size: 12px; }
+.unread-badge[hidden] { display: none; }
+#read-status { margin: 0 32px 8px; color: #a33; font-size: 13px; }
+.history-retry { align-self: flex-start; margin: 0 32px 12px; }
+
+.room-open > strong { display: block; margin-bottom: 8px; font-size: 14px; }
+.send-button:not(:disabled) { background: #365b40; color: white; cursor: pointer; }

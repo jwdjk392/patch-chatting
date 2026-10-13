@@ -6,7 +6,7 @@ Pages use EJS templates in `src/views`; `GET /` renders `index.ejs`.
 Set `SITE_NAME` in `.env` to customize the service name (defaults to `Patch Chatting`).
 Guests see a landing page with `/signup` and `/login` links. Signed-in users see
 a chat layout with their name loaded from the database and a sign-out dropdown.
-The chat layout is an empty UI; messaging is not implemented yet.
+Select a room to load its latest 100 saved messages and send messages with the composer.
 Socket.IO shares the Express HTTP server and port, using the default `/socket.io/`
 endpoint. The signed-in chat page loads the bundled client and connects through
 `src/public/js/chat.js`. A persistent status bar shows connection, authentication,
@@ -30,7 +30,35 @@ Connection/authentication failures show a modal with reconnect and login actions
 transport failures retry automatically up to five times and authenticate again.
 Tokens stay in memory, and token responses are not cached. Logging out prevents
 new token issuance; an already issued token remains valid until its 15-minute expiry.
-Messaging events are not implemented yet.
+Authenticated clients send `message:send` with `{ roomId, text }` and an acknowledgement callback.
+The server validates 1–4000 characters, derives the sender from the verified token,
+and checks room membership inside the save transaction. After the transaction commits,
+it emits `message:new` with the persisted `{ id, roomId, senderId, text, sentAt }`
+to authenticated sockets belonging to the room members (including the sender's tabs).
+The acknowledgement is `{ ok: true, message }` or `{ ok: false, error: { code, message } }`.
+Offline recipients still have their messages saved. `GET /api/chat-rooms/:roomId/messages`
+requires session authentication and membership and returns the latest 100 messages in
+chronological order. The browser loads history on room selection and reconnection,
+and deduplicates live events and acknowledgements by message ID.
+Room cards show unread counts and open the conversation. Enter sends a message;
+Shift+Enter inserts a newline, and switching rooms preserves unsent drafts.
+`GET /api/chat-rooms` includes `lastReadMessageId` and `unreadCount` for the current
+account. Unread counts count messages with IDs greater than the saved read ID,
+excluding the account's own messages; a null read ID means nothing has been read.
+When history has loaded and the selected room is visible and scrolled to the bottom,
+the browser sends `message:read` with `{ roomId, messageId }`. The server verifies
+membership and that the message belongs to that room, then conditionally advances
+`RoomMember.lastReadMessageId`. Older or duplicate acknowledgements never lower it.
+After commit, `room:read` sends `{ roomId, lastReadMessageId }` to that account's
+connected tabs; the acknowledgement adds `ok: true`. Room counts refresh after
+messages, saved read progress, reconnection, and returning to the tab.
+Opening a room shows its latest 100 messages and marks through the latest displayed
+message when at the bottom, including older history before that ID. Hidden tabs and
+rooms scrolled away from the bottom do not advance read progress. Failed read saves
+can be retried with the conversation's reload button. No schema migration is needed.
+Live delivery uses Socket.IO's in-memory rooms on this server; it is best effort,
+while the database is the durable record. Timed-out sends are not retried automatically:
+check history before retrying, since the save may have succeeded.
 `GET /login` and `GET /signup` render forms that post to `/api/auth/login` and
 `/api/auth/create-account`. Browser validation uses the installed `validator` library
 and the server's shared signup password rules: at least eight characters with a

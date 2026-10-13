@@ -12,6 +12,8 @@
         if (status.dataset.state !== state) console.info('[Chat] Connection status', { state });
         status.dataset.state = state;
         status.textContent = labels[state];
+        document.chatClient?.onStatus?.();
+        document.chatClient?.onRoomsStatus?.();
     }
     function showProblem(text) {
         message.textContent = text;
@@ -31,6 +33,7 @@
     let expiryTimer;
     let request;
     let deadline = 0;
+    document.chatClient = { socket, isReady: () => socket.connected && deadline > Date.now() };
 
     function clearAuthentication() {
         generation++;
