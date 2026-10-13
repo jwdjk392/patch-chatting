@@ -47,6 +47,7 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "paths": {
+      "@middleware/*": ["./src/middleware/*"],
       "@controller/*": ["./src/controller/*"],
       "@router/*": ["./src/router/*"],
       "@lib/*": ["./src/lib/*"],

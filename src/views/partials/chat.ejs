@@ -22,8 +22,12 @@
     <div id="connection-status" class="connection-status" data-state="connecting" role="status" aria-live="polite" aria-atomic="true">서버 연결 중…</div>
     <div class="chat-layout">
         <aside class="sidebar" aria-label="대화 목록">
-            <div class="sidebar-heading"><h2>메시지</h2><span class="count">0</span></div>
-            <div class="conversation-placeholder"><span class="empty-icon" aria-hidden="true">☏</span><h3>아직 대화가 없어요</h3><p>대화 목록이 여기에 표시돼요.</p></div>
+            <div class="sidebar-heading"><h2>메시지</h2><span id="room-count" class="count">…</span></div>
+            <button id="new-room" class="button button-primary" type="button">새 대화방 만들기</button>
+            <p id="room-list-status" role="status" aria-live="polite">대화방을 불러오는 중…</p>
+            <button id="retry-rooms" class="button button-secondary" type="button" hidden>다시 불러오기</button>
+            <ul id="room-list" class="room-list" aria-label="참여 중인 대화방" aria-busy="true"></ul>
+            <div id="rooms-empty" class="conversation-placeholder" hidden><span class="empty-icon" aria-hidden="true">☏</span><h3>아직 대화가 없어요</h3><p>새 대화방을 만들어 보세요.</p></div>
             <div class="sidebar-user"><span class="status-dot" aria-hidden="true"></span> <strong><%= user.name %></strong> 님으로 로그인 중</div>
         </aside>
         <main class="chat-main">
@@ -42,3 +46,21 @@
         </main>
     </div>
 </div>
+<dialog id="room-dialog" class="connection-dialog" aria-labelledby="room-dialog-title">
+    <h2 id="room-dialog-title">새 대화방 만들기</h2>
+    <form id="room-form">
+        <label for="room-name">대화방 이름</label>
+        <input id="room-name" name="name" maxlength="100" required autocomplete="off">
+        <label for="user-search">이메일 또는 닉네임으로 찾기</label>
+        <input id="user-search" type="search" minlength="2" maxlength="100" autocomplete="off" placeholder="2자 이상 입력해 주세요">
+        <p id="search-status" role="status" aria-live="polite"></p>
+        <ul id="user-results" class="user-options" aria-label="검색 결과"></ul>
+        <h3>선택한 사용자</h3>
+        <ul id="selected-users" class="user-options" aria-label="선택한 사용자"></ul>
+        <p id="room-error" role="alert"></p>
+        <div class="connection-actions">
+            <button id="create-room" class="button button-primary" type="submit">만들기</button>
+            <button id="cancel-room" class="button button-secondary" type="button">취소</button>
+        </div>
+    </form>
+</dialog>

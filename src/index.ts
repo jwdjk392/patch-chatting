@@ -2,6 +2,8 @@ import express from 'express';
 import { logger } from '@lib/logger';
 import { pinoHttp } from 'pino-http';
 import authRouter from '@router/authRouter'
+import chatRoomRouter from '@router/chatRoomRouter';
+import userRouter from '@router/userRouter';
 import bodyParser from 'body-parser';
 import session from 'express-session';
 import connectPgSimple from 'connect-pg-simple';
@@ -10,7 +12,7 @@ import { createRequire } from 'node:module';
 import { createServer } from 'node:http';
 
 import 'dotenv/config';
-import { apiErrorHandler } from '@controller/apiErrorMiddleware';
+import { apiErrorHandler } from '@middleware/apiErrorMiddleware';
 import { homeHandler } from '@controller/homeController';
 import { loginPageHandler, signupPageHandler } from '@controller/authPageController';
 import { setupSocketController } from '@controller/socketController';
@@ -60,6 +62,8 @@ app.get("/login", loginPageHandler);
 app.get("/signup", signupPageHandler);
 
 app.use("/api/auth", authRouter);
+app.use('/api/chat-rooms', chatRoomRouter);
+app.use('/api/users', userRouter);
 app.use("/api", apiErrorHandler);
 
 const httpServer = createServer(app);

@@ -4,8 +4,10 @@ import type { Request, Response } from 'express';
 import { fileURLToPath } from 'node:url';
 import { homeHandler } from './homeController';
 import { findAccountById } from '@repository/authDBHandler';
+import { listChatRooms } from '@repository/chatRoomDB';
 
 vi.mock('@repository/authDBHandler', () => ({ findAccountById: vi.fn() }));
+vi.mock('@repository/chatRoomDB', () => ({ listChatRooms: vi.fn() }));
 
 const app = express();
 app.set('view engine', 'ejs');
@@ -30,6 +32,14 @@ async function renderHome(userId?: string) {
 afterEach(() => { vi.resetAllMocks(); vi.unstubAllEnvs(); });
 
 describe('home page', () => {
+    test('renders the client room-list shell without fetching rooms', async () => {
+        vi.mocked(findAccountById).mockResolvedValue({ id: 'user-1', name: 'Alice', username: 'alice' });
+        const { html } = await renderHome('user-1');
+        expect(listChatRooms).not.toHaveBeenCalled();
+        expect(html).toContain('id="room-list"');
+        expect(html).toContain('src="/js/chat-rooms.js"');
+    });
+
     test('escapes environment and account values in the HTML', async () => {
         vi.stubEnv('SITE_NAME', '<script>site</script>');
         vi.mocked(findAccountById).mockResolvedValue({ id: 'user-1', name: '<script>name</script>', username: '<script>handle</script>' });

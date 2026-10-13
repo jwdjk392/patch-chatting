@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [tsconfigPaths()],
   resolve: {
     alias: Object.fromEntries(
-      ['controller', 'router', 'lib', 'service', 'repository', 'prisma'].map(name => [
+      ['middleware', 'controller', 'router', 'lib', 'service', 'repository', 'prisma/db'].map(name => [
         `@${name}`,
         fileURLToPath(new URL(`./src/${name}`, import.meta.url)),
       ]),
