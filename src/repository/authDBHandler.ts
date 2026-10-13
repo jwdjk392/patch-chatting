@@ -31,4 +31,8 @@ async function findAccountByEmail(email: string) {
     return db.orm.public.User.where({ email }).select('id', 'password').first();
 }
 
-export { createAccountRecord, findAccountByEmail }
+async function findAccountById(id: string) {
+    return db.orm.public.User.where({ id }).select('id', 'name', 'username').first();
+}
+
+export { createAccountRecord, findAccountByEmail, findAccountById }

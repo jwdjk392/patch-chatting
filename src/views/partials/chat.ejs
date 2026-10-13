@@ -1,0 +1,34 @@
+<div class="chat-shell">
+    <header class="chat-header">
+        <a class="brand" href="/"><span class="brand-icon" aria-hidden="true">◌</span><%= siteName %></a>
+        <details class="account-menu">
+            <summary><span class="avatar"><%= Array.from(user.name)[0] %></span><span class="account-name"><%= user.name %></span><span class="chevron" aria-hidden="true">⌄</span></summary>
+            <div class="account-dropdown">
+                <p class="dropdown-name"><%= user.name %></p>
+                <p class="username">@<%= user.username %></p>
+                <a class="signout" href="/api/auth/logout">Sign out <span aria-hidden="true">↗</span></a>
+            </div>
+        </details>
+    </header>
+    <div class="chat-layout">
+        <aside class="sidebar" aria-label="Conversations">
+            <div class="sidebar-heading"><h2>Messages</h2><span class="count">0</span></div>
+            <div class="conversation-placeholder"><span class="empty-icon" aria-hidden="true">☏</span><h3>A quiet moment</h3><p>Your conversations will appear here.</p></div>
+            <div class="sidebar-user"><span class="status-dot" aria-hidden="true"></span> Signed in as <strong><%= user.name %></strong></div>
+        </aside>
+        <main class="chat-main">
+            <header class="conversation-header"><h1>Your space to chat</h1><p>A good conversation starts with hello.</p></header>
+            <section class="chat-empty" aria-label="No conversation selected">
+                <div class="welcome-icon" aria-hidden="true">◌</div>
+                <p class="eyebrow">Make yourself at home</p>
+                <h2>Hello, <%= user.name %>.</h2>
+                <p>This is where you’ll catch up, share ideas, and stay connected.<br>Select a conversation when one is available.</p>
+            </section>
+            <div class="composer">
+                <label class="sr-only" for="message">Message</label>
+                <textarea id="message" rows="1" placeholder="Select a conversation to start chatting" disabled></textarea>
+                <button class="send-button" type="button" disabled aria-label="Send message">↑</button>
+            </div>
+        </main>
+    </div>
+</div>

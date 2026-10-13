@@ -6,13 +6,18 @@ import bodyParser from 'body-parser';
 import session from 'express-session';
 import connectPgSimple from 'connect-pg-simple';
 import path from 'path';
+import { createRequire } from 'node:module';
 
 import 'dotenv/config';
 import { apiErrorHandler } from '@controller/apiErrorMiddleware';
+import { homeHandler } from '@controller/homeController';
+import { loginPageHandler, signupPageHandler } from '@controller/authPageController';
 
 const port = process.env.PORT ?? 80
 
 const app = express();
+app.set("view engine", "ejs");
+app.set("views", path.join(import.meta.dirname, "views"));
 const sessionSecret = process.env.SESSION_SECRET;
 if (!sessionSecret) {
     throw new Error("SESSION_SECRET must be set.");
@@ -28,7 +33,11 @@ app.use(pinoHttp({ logger }))
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true}))
 
-app.use(express.static(path.join(import.meta.dirname, "public")));
+app.use(express.static(path.join(import.meta.dirname, "public"), { index: false }));
+
+// Serve the installed validator version so browser and server use identical algorithms.
+const validatorScript = createRequire(import.meta.url).resolve('validator/validator.min.js');
+app.get('/js/vendor/validator.min.js', (_req, res) => res.sendFile(validatorScript));
 
 app.use(session({
     store: new PgSessionStore({
@@ -43,6 +52,10 @@ app.use(session({
         secure: process.env.NODE_ENV === 'production'
     }
 }));
+
+app.get("/", homeHandler);
+app.get("/login", loginPageHandler);
+app.get("/signup", signupPageHandler);
 
 app.use("/api/auth", authRouter);
 app.use("/api", apiErrorHandler);

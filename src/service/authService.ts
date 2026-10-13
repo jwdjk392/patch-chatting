@@ -2,6 +2,7 @@ import { AppError, DbUniqueError } from "@lib/error";
 import { createAccountRecord, findAccountByEmail } from "@repository/authDBHandler"
 import bcrypt from 'bcrypt';
 import validator from 'validator';
+import { signupPasswordRules } from '@lib/authValidation';
 async function createAccount(email: string, username: string, name: string, password: string) {
     if (!validator.isEmail(email)) {
         throw new AppError({
@@ -11,7 +12,7 @@ async function createAccount(email: string, username: string, name: string, pass
         })
     }
 
-    if (!validator.isStrongPassword(password, {minLength: 8, minLowercase: 1, minUppercase: 1, minSymbols: 1})) {
+    if (!validator.isStrongPassword(password, signupPasswordRules)) {
         throw new AppError({
             statusCode: 400,
             code: "INVALID_PASSWORD",
