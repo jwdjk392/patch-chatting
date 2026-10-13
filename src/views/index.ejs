@@ -10,6 +10,8 @@
 <body>
     <% if (user) { %>
         <%- include('partials/chat', { siteName, user }) %>
+        <script src="/socket.io/socket.io.js" defer></script>
+        <script src="/js/chat.js" defer></script>
     <% } else { %>
         <%- include('partials/landing', { siteName }) %>
     <% } %>

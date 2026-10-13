@@ -7,11 +7,13 @@ import session from 'express-session';
 import connectPgSimple from 'connect-pg-simple';
 import path from 'path';
 import { createRequire } from 'node:module';
+import { createServer } from 'node:http';
 
 import 'dotenv/config';
 import { apiErrorHandler } from '@controller/apiErrorMiddleware';
 import { homeHandler } from '@controller/homeController';
 import { loginPageHandler, signupPageHandler } from '@controller/authPageController';
+import { setupSocketController } from '@controller/socketController';
 
 const port = process.env.PORT ?? 80
 
@@ -60,4 +62,7 @@ app.get("/signup", signupPageHandler);
 app.use("/api/auth", authRouter);
 app.use("/api", apiErrorHandler);
 
-app.listen(port, () => logger.info("Server running @ " + port));
+const httpServer = createServer(app);
+setupSocketController(httpServer);
+
+httpServer.listen(port, () => logger.info("Server running @ " + port));

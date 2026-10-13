@@ -1,3 +1,12 @@
+<dialog id="connection-dialog" class="connection-dialog" aria-labelledby="connection-title" aria-describedby="connection-message">
+    <h2 id="connection-title">채팅 연결 문제</h2>
+    <p id="connection-message" role="status"></p>
+    <div class="connection-actions">
+        <button id="connection-retry" class="button button-primary" type="button">다시 연결</button>
+        <a class="button button-secondary" href="/login">다시 로그인</a>
+        <form method="dialog"><button class="button button-secondary">닫기</button></form>
+    </div>
+</dialog>
 <div class="chat-shell">
     <header class="chat-header">
         <a class="brand" href="/"><span class="brand-icon" aria-hidden="true">◌</span><%= siteName %></a>
@@ -10,6 +19,7 @@
             </div>
         </details>
     </header>
+    <div id="connection-status" class="connection-status" data-state="connecting" role="status" aria-live="polite" aria-atomic="true">서버 연결 중…</div>
     <div class="chat-layout">
         <aside class="sidebar" aria-label="대화 목록">
             <div class="sidebar-heading"><h2>메시지</h2><span class="count">0</span></div>

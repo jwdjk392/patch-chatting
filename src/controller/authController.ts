@@ -1,5 +1,15 @@
 import type { Request, Response } from 'express';
 import { createAccount, login } from '@service/authService';
+import { createSocketToken } from '@service/socketAuthService';
+import { AppError } from '@lib/error';
+
+export async function getTokenHandler(req: Request, res: Response) {
+    res.set('Cache-Control', 'no-store');
+    if (!req.session.userId) {
+        throw new AppError({ statusCode: 401, code: 'UNAUTHENTICATED', message: 'Please log in again.' });
+    }
+    res.json(await createSocketToken(req.session.userId, req.sessionID));
+}
 
 /**
  * Controller: Hashes user's password, and calls account creation function.
