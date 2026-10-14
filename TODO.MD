@@ -1,3 +1,3 @@
-- [ ] Add DB Connection
-- [ ] Add Authentication
-- [ ] Add 
+로그 관련 문제 해결
+메시지 보낼때 로딩 표시기
+기타 자잘한 UI 마무리

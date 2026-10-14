@@ -1,5 +1,6 @@
 (() => {
     const dialog = document.getElementById('room-dialog');
+    const modal = bootstrap.Modal.getOrCreateInstance(dialog);
     const form = document.getElementById('room-form');
     const search = document.getElementById('user-search');
     const results = document.getElementById('user-results');
@@ -13,6 +14,10 @@
     const roomLoading = document.getElementById('room-loading');
     const roomsEmpty = document.getElementById('rooms-empty');
     const retryRooms = document.getElementById('retry-rooms');
+    const sidebar = document.getElementById('room-sidebar');
+    function closeSidebar() {
+        globalThis.bootstrap?.Offcanvas.getInstance(sidebar)?.hide();
+    }
     let listVersion = 0;
     let activeRoomId;
     let refreshTimer;
@@ -41,20 +46,23 @@
             if (current !== listVersion) return;
             const cards = rooms.map((room) => {
                 const card = document.createElement('li');
-                card.className = 'room-card';
+                card.className = 'mb-2';
                 const button = document.createElement('button');
                 button.type = 'button';
-                button.className = 'room-open';
+                button.className = `btn btn-outline-primary w-100 text-start text-break p-3${room.id === activeRoomId ? ' active' : ''}`;
                 button.setAttribute('aria-pressed', String(room.id === activeRoomId));
                 button.addEventListener('click', () => document.dispatchEvent(new CustomEvent('chat:select', { detail: room })));
                 const title = document.createElement('strong');
+                title.className = 'd-block mb-2';
                 title.textContent = room.name;
                 const members = document.createElement('p');
+                members.className = 'small mb-2';
                 members.textContent = room.members.map(({ user }) => user.name?.trim() || user.username).join(', ');
                 const count = document.createElement('span');
+                count.className = 'small';
                 count.textContent = `${room.members.length}명 참여 중`;
                 const unread = document.createElement('span');
-                unread.className = 'unread-badge';
+                unread.className = 'badge rounded-pill text-bg-primary ms-2';
                 unread.hidden = !room.unreadCount;
                 unread.textContent = String(room.unreadCount || 0);
                 unread.setAttribute('aria-label', `읽지 않은 메시지 ${room.unreadCount || 0}개`);
@@ -87,9 +95,11 @@
         refreshTimer = setTimeout(loadRooms, 150);
     }
     document.addEventListener('chat:select', (event) => {
+        closeSidebar();
         activeRoomId = event.detail.id;
         for (const card of roomList.children) {
             card.children[0].setAttribute('aria-pressed', String(card.roomId === activeRoomId));
+            card.children[0].className = `btn btn-outline-primary w-100 text-start text-break p-3${card.roomId === activeRoomId ? ' active' : ''}`;
         }
     });
     document.addEventListener('visibilitychange', () => {
@@ -113,6 +123,7 @@
         const item = document.createElement('li');
         const button = document.createElement('button');
         button.type = 'button';
+        button.className = 'btn btn-outline-secondary w-100 text-start text-break mb-2';
         button.textContent = `${user.name || user.username} (@${user.username}) · ${user.email} · ${remove ? '제외' : '추가'}`;
         button.disabled = !remove && selected.has(user.id);
         button.addEventListener('click', () => {
@@ -131,8 +142,20 @@
         selectedList.replaceChildren(...Array.from(selected.values(), (user) => userButton(user, true)));
     }
 
-    document.getElementById('new-room').addEventListener('click', () => dialog.showModal());
-    document.getElementById('cancel-room').addEventListener('click', () => dialog.close());
+    document.getElementById('new-room').addEventListener('click', () => {
+        // Let the offcanvas finish restoring scrolling and focus before opening the modal.
+        if (sidebar.classList.contains('show')) {
+            sidebar.addEventListener('hidden.bs.offcanvas', () => modal.show(), { once: true });
+            closeSidebar();
+        } else {
+            modal.show();
+        }
+    });
+    dialog.addEventListener('shown.bs.modal', () => document.getElementById('room-name').focus());
+    dialog.addEventListener('hidden.bs.modal', () => {
+        const trigger = matchMedia('(min-width: 768px)').matches ? 'new-room' : 'toggle-rooms';
+        document.getElementById(trigger).focus();
+    });
     search.addEventListener('input', () => {
         clearTimeout(timer);
         request?.abort();
@@ -176,7 +199,7 @@
             submit.disabled = false;
         }
         // Creation succeeded even if the subsequent list request fails.
-        dialog.close();
+        modal.hide();
         clearTimeout(timer);
         request?.abort();
         version++;

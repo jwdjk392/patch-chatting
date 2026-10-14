@@ -11,9 +11,9 @@ class Element {
     children: Element[] = [];
     attributes: Record<string, string> = {};
     handlers: Record<string, (...args: any[]) => any> = {};
-    close = vi.fn();
+    classList = { contains: vi.fn(() => false) };
+    focus = vi.fn();
     reset = vi.fn();
-    showModal = vi.fn();
     addEventListener(event: string, handler: (...args: any[]) => any) { this.handlers[event] = handler; }
     append(...children: Element[]) { this.children.push(...children); }
     replaceChildren(...children: Element[]) { this.children = children; }
@@ -25,6 +25,8 @@ let reload: ReturnType<typeof vi.fn>;
 let documentHandlers: Record<string, (...args: any[]) => any>;
 let socketHandlers: Record<string, (...args: any[]) => any>;
 let client: any;
+let modal: { show: ReturnType<typeof vi.fn>; hide: ReturnType<typeof vi.fn> };
+let offcanvas: { hide: ReturnType<typeof vi.fn> };
 const el = (id: string) => elements[id] ??= new Element();
 const reply = (data: unknown) => ({ ok: true, json: async () => data });
 const room = { name: '<img src=x onerror=alert(1)>', members: [{ user: { name: 'Bob', username: 'bob' } }] };
@@ -40,12 +42,16 @@ function start() {
             detail: unknown;
             constructor(public type: string, options: { detail: unknown }) { this.detail = options.detail; }
         },
+        bootstrap: { Modal: { getOrCreateInstance: () => modal }, Offcanvas: { getInstance: () => offcanvas } },
+        matchMedia: () => ({ matches: false }),
         fetch: request, location: { reload }, AbortController, setTimeout, clearTimeout,
     });
 }
 beforeEach(() => {
     vi.useFakeTimers();
     elements = {};
+    modal = { show: vi.fn(), hide: vi.fn() };
+    offcanvas = { hide: vi.fn() };
     documentHandlers = {};
     socketHandlers = {};
     client = { isReady: vi.fn(() => true), socket: {
@@ -93,7 +99,7 @@ test.each([false, true])('creation updates without reload; refresh failure=%s', 
     el('room-name').value = 'Friends';
     await el('room-form').handlers.submit!({ preventDefault: vi.fn() });
     expect(reload).not.toHaveBeenCalled();
-    expect(el('room-dialog').close).toHaveBeenCalledOnce();
+    expect(modal.hide).toHaveBeenCalledOnce();
     expect(el('room-form').reset).toHaveBeenCalledOnce();
     expect(el('selected-users').children).toHaveLength(0);
     expect(el('create-room').disabled).toBe(false);
@@ -139,4 +145,29 @@ test('new messages and read acknowledgements refresh persisted unread counts and
     client.onRoomsStatus();
     await vi.advanceTimersByTimeAsync(150);
     expect(request).toHaveBeenCalledTimes(4);
+});
+
+test('waits for the mobile sidebar to close before opening the modal', async () => {
+    request.mockResolvedValue(reply({ rooms: [] }));
+    start();
+    el('room-sidebar').classList.contains.mockReturnValue(true);
+    el('new-room').handlers.click!();
+    expect(offcanvas.hide).toHaveBeenCalledOnce();
+    expect(modal.show).not.toHaveBeenCalled();
+    el('room-sidebar').handlers['hidden.bs.offcanvas']!();
+    expect(modal.show).toHaveBeenCalledOnce();
+    el('room-dialog').handlers['shown.bs.modal']!();
+    expect(el('room-name').focus).toHaveBeenCalledOnce();
+    el('room-dialog').handlers['hidden.bs.modal']!();
+    expect(el('toggle-rooms').focus).toHaveBeenCalledOnce();
+    await flush();
+});
+
+test('opens the modal directly when the sidebar is not overlaid', async () => {
+    request.mockResolvedValue(reply({ rooms: [] }));
+    start();
+    el('new-room').handlers.click!();
+    expect(modal.show).toHaveBeenCalledOnce();
+    expect(offcanvas.hide).not.toHaveBeenCalled();
+    await flush();
 });

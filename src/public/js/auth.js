@@ -27,6 +27,7 @@ if (form && validator) {
         const input = form.elements.namedItem(name);
         const error = document.getElementById(`${name}-error`);
         input.setAttribute('aria-invalid', message ? 'true' : 'false');
+        input.classList.toggle('is-invalid', Boolean(message));
         error.textContent = message || '';
         error.hidden = !message;
     }
@@ -42,6 +43,7 @@ if (form && validator) {
         const password = form.elements.namedItem('password').value;
         const valid = validator.isStrongPassword(password, passwordRules);
         strength.dataset.valid = String(valid);
+        strength.className = valid ? 'form-text text-success' : 'form-text';
         strength.textContent = !password ? '' : valid ? '비밀번호가 모든 조건을 충족해요.' : '안내된 문자 종류를 포함해 안전한 비밀번호를 만들어 주세요.';
     }
 

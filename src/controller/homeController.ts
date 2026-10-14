@@ -9,6 +9,6 @@ export async function homeHandler(req: Request, res: Response) {
     res.set('Cache-Control', 'no-store');
     res.render('index', {
         siteName: process.env.SITE_NAME?.trim() || 'Patch Chatting',
-        user: user ? { name: user.name?.trim() || user.username, username: user.username } : null,
+        user: user ? { id: user.id, name: user.name?.trim() || user.username, username: user.username } : null,
     });
 }

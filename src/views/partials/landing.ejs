@@ -1,28 +1,37 @@
-<div class="landing">
-    <header class="landing-header">
-        <a class="brand" href="/" aria-label="홈"><span class="brand-icon" aria-hidden="true">◌</span><%= siteName %></a>
-        <span class="header-note">좋은 대화가 시작되는 곳.</span>
+<div class="container min-vh-100 d-flex flex-column px-4">
+    <header class="d-flex align-items-center justify-content-between gap-3 py-4">
+        <a class="d-inline-flex align-items-center gap-2 fs-4 fw-bold text-primary text-decoration-none text-break" href="/" aria-label="홈">
+            <span class="badge bg-primary text-white rounded-3 fs-4" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chat-left-dots-fill" viewBox="0 0 16 16">
+                    <path d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4.414a1 1 0 0 0-.707.293L.854 15.146A.5.5 0 0 1 0 14.793zm5 4a1 1 0 1 0-2 0 1 1 0 0 0 2 0m4 0a1 1 0 1 0-2 0 1 1 0 0 0 2 0m3 1a1 1 0 1 0 0-2 1 1 0 0 0 0 2"/>
+                </svg>
+            </span>
+            <%= siteName %>
+        </a>
+        <span class="small text-body-secondary d-none d-sm-inline">좋은 대화가 시작되는 곳.</span>
     </header>
-    <main class="hero">
-        <section class="hero-copy">
-            <p class="eyebrow"><span class="status-dot" aria-hidden="true"></span> 마음을 나누는 공간</p>
-            <h1>소중한 사람들.<br>함께 나누는 대화.<br><span>우리만의 작은 공간.</span></h1>
-            <p class="description">일상의 대화를 나누는 온라인 채팅 서비스, <strong><%= siteName %></strong>에 오신 것을 환영해요. 친구들과 안부를 묻고 생각을 나누며 조금 더 가까워져 보세요.</p>
-            <div class="hero-actions">
-                <a class="button button-primary" href="/signup">회원가입 <span aria-hidden="true">↗</span></a>
-                <a class="button button-secondary" href="/login">로그인</a>
+    <main class="row align-items-center g-5 flex-grow-1 py-5">
+        <section class="col-12 col-lg-6">
+            <p class="small fw-semibold text-primary text-uppercase"><span class="badge rounded-pill bg-primary p-1" aria-hidden="true"></span> 마음을 나누는 공간</p>
+            <h1 class="display-5 fw-semibold my-4">소중한 사람들.<br>함께 나누는 대화.<br><span class="text-primary">우리만의 작은 공간.</span></h1>
+            <p class="lead text-body-secondary text-break">일상의 대화를 나누는 온라인 채팅 서비스, <strong><%= siteName %></strong>에 오신 것을 환영해요. 친구들과 안부를 묻고 생각을 나누며 조금 더 가까워져 보세요.</p>
+            <div class="d-flex flex-wrap gap-3 mt-4">
+                <a class="btn btn-primary" href="/signup">회원가입 <span aria-hidden="true">↗</span></a>
+                <a class="btn btn-outline-secondary" href="/login">로그인</a>
             </div>
         </section>
-        <div class="preview" aria-label="다정한 대화 예시">
-            <div class="preview-heading"><span class="status-dot" aria-hidden="true"></span> 일상 속 안부 <span class="preview-label">미리보기</span></div>
-            <div class="preview-content">
-                <p class="day-label">짧은 인사로 마음을 전해 보세요</p>
-                <div class="sample-message"><span class="avatar peach" aria-hidden="true">지</span><div><span class="message-name">지민</span><p class="bubble">안녕! 오늘 하루 어때? ☀️</p></div></div>
-                <div class="sample-message outgoing"><div><span class="message-name">나</span><p class="bubble">너랑 이야기하니까 더 좋아졌어.</p></div></div>
-                <div class="sample-message"><span class="avatar peach" aria-hidden="true">지</span><div><span class="message-name">지민</span><p class="bubble">나눌 이야기가 정말 많아!</p></div></div>
+        <div class="col-12 col-lg-6">
+            <div class="card border shadow-sm rounded-4" aria-label="다정한 대화 예시">
+                <div class="card-header d-flex align-items-center gap-2 py-3 bg-body"><span class="badge rounded-pill bg-primary p-1" aria-hidden="true"></span> 일상 속 안부 <span class="ms-auto small text-body-secondary">미리보기</span></div>
+                <div class="card-body p-4">
+                    <p class="small text-center text-body-secondary mb-4">짧은 인사로 마음을 전해 보세요</p>
+                    <div class="d-flex align-items-start gap-2 mb-4"><span class="badge rounded-pill text-bg-warning p-2" aria-hidden="true">지</span><div><span class="small text-body-secondary">지민</span><p class="rounded-3 bg-body-tertiary p-3 mt-1 mb-0">안녕! 오늘 하루 어때? ☀️</p></div></div>
+                    <div class="d-flex justify-content-end text-end mb-4"><div><span class="small text-body-secondary">나</span><p class="rounded-3 text-bg-primary p-3 mt-1 mb-0">너랑 이야기하니까 더 좋아졌어.</p></div></div>
+                    <div class="d-flex align-items-start gap-2 mb-4"><span class="badge rounded-pill text-bg-warning p-2" aria-hidden="true">지</span><div><span class="small text-body-secondary">지민</span><p class="rounded-3 bg-body-tertiary p-3 mt-1 mb-0">나눌 이야기가 정말 많아!</p></div></div>
+                </div>
+                <div class="card-footer bg-body small text-center text-body-secondary py-3">작은 순간이 만드는 진심 어린 만남.</div>
             </div>
-            <div class="preview-footer">작은 순간이 만드는 진심 어린 만남.</div>
         </div>
     </main>
-    <footer class="landing-footer"><%= siteName %> <span>바쁜 일상 사이, 함께하는 순간을 위해.</span></footer>
+    <footer class="border-top py-4 d-flex flex-column flex-sm-row justify-content-between gap-2 small text-body-secondary"><%= siteName %> <span>바쁜 일상 사이, 함께하는 순간을 위해.</span></footer>
 </div>

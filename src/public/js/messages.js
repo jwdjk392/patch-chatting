@@ -2,6 +2,7 @@
     const client = document.chatClient;
     if (!client) return;
     const list = document.getElementById('messages');
+    const currentUserId = list.dataset.currentUserId;
     const input = document.getElementById('message');
     const send = document.getElementById('send-message');
     const form = document.getElementById('message-form');
@@ -48,16 +49,37 @@
     }
     function render(stickToBottom = false) {
         list.replaceChildren(...Array.from(messages.values()).sort((a, b) => a.id - b.id).map((message) => {
+            const outgoing = message.senderId === currentUserId;
             const item = document.createElement('li');
+            item.className = `d-flex align-items-start gap-2 mb-4 ${outgoing ? 'justify-content-end' : 'justify-content-start'}`;
             const sender = room.members.find((member) => member.userId === message.senderId)?.user;
-            const label = document.createElement('strong');
-            label.textContent = sender?.name || sender?.username || '알 수 없는 사용자';
+            const name = sender?.name?.trim() || sender?.username || '알 수 없는 사용자';
+            if (!outgoing) {
+                const avatar = document.createElement('span');
+                avatar.className = 'badge rounded-pill text-bg-warning p-2 flex-shrink-0';
+                avatar.setAttribute('aria-hidden', 'true');
+                avatar.textContent = Array.from(name)[0];
+                item.append(avatar);
+            }
+            const content = document.createElement('div');
+            content.className = `d-flex flex-column w-75 ${outgoing ? 'align-items-end' : 'align-items-start'}`;
+            const label = document.createElement('span');
+            label.className = 'small text-body-secondary text-break mw-100';
+            label.textContent = outgoing ? '나' : name;
             const body = document.createElement('p');
-            body.textContent = message.text;
+            body.className = `rounded-3 p-3 mt-1 mb-1 mw-100 text-start text-break ${outgoing ? 'text-bg-primary' : 'bg-body-tertiary'}`;
+            // Preserve line breaks while treating all message content as plain text.
+            message.text.split('\n').forEach((line, index) => {
+                if (index) body.append(document.createElement('br'));
+                body.append(document.createTextNode(line));
+            });
             const time = document.createElement('time');
+            time.className = 'small text-body-secondary';
             time.dateTime = message.sentAt;
-            time.textContent = new Date(message.sentAt).toLocaleString();
-            item.append(label, body, time);
+            time.title = new Date(message.sentAt).toLocaleString();
+            time.textContent = new Date(message.sentAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            content.append(label, body, time);
+            item.append(content);
             return item;
         }));
         if (stickToBottom) list.scrollTop = list.scrollHeight;

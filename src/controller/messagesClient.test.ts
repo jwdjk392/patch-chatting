@@ -9,7 +9,14 @@ class Element {
     scrollHeight = 100;
     scrollTop = 0;
     clientHeight = 100;
-    textContent = '';
+    private text = '';
+    get textContent(): string { return this.text + this.children.map(child => child.textContent).join(''); }
+    set textContent(value: string) { this.text = value; this.children = []; }
+    className = '';
+    tagName = '';
+    dataset = { currentUserId: 'alice' };
+    attributes: Record<string, string> = {};
+    setAttribute(name: string, value: string) { this.attributes[name] = value; }
     value = '';
     hidden = false;
     disabled = false;
@@ -41,7 +48,9 @@ beforeEach(() => {
     } };
     request = vi.fn(async () => ({ ok: true, json: async () => ({ messages: [message] }) }));
     documentMock = {
-        chatClient: client, getElementById: el, createElement: () => new Element(),
+        chatClient: client, getElementById: el,
+        createElement: (tag: string) => { const node = new Element(); node.tagName = tag; return node; },
+        createTextNode: (text: string) => { const node = new Element(); node.textContent = text; return node; },
         addEventListener: (event: string, handler: (...args: any[]) => any) => { documentHandlers[event] = handler; },
         hidden: false,
     };
@@ -59,7 +68,7 @@ test('loads saved messages and deduplicates acknowledgements and live events usi
     await el('message-form').handlers.submit!({ preventDefault: vi.fn() });
     expect(client.socket.emitWithAck).toHaveBeenCalledWith('message:send', { roomId: 'room', text: message.text });
     expect(el('messages').children).toHaveLength(1);
-    expect(el('messages').children[0]!.children[1]!.textContent).toBe('<img src=x>');
+    expect(el('messages').children[0]!.children[1]!.children[1]!.textContent).toBe('<img src=x>');
     expect(el('message').value).toBe('');
 });
 
@@ -154,4 +163,28 @@ test('read events from another tab prevent redundant older acknowledgements', as
     select();
     await flush();
     expect(client.socket.emitWithAck).not.toHaveBeenCalled();
+});
+
+test('distinguishes our bubbles from incoming messages using the signed-in user ID', async () => {
+    select();
+    await flush();
+    socketHandlers['message:new']!({ ...message, id: 2, senderId: 'alice' });
+    const [incoming, outgoing] = el('messages').children;
+    expect(incoming!.className).toContain('justify-content-start');
+    expect(incoming!.children[0]!.textContent).toBe('b');
+    expect(incoming!.children[1]!.children[0]!.textContent).toBe('bob');
+    expect(incoming!.children[1]!.children[1]!.className).toContain('bg-body-tertiary');
+    expect(outgoing!.className).toContain('justify-content-end');
+    expect(outgoing!.children).toHaveLength(1);
+    expect(outgoing!.children[0]!.children[0]!.textContent).toBe('나');
+    expect(outgoing!.children[0]!.children[1]!.className).toContain('text-bg-primary');
+});
+
+test('preserves blank lines and renders markup as text in message bubbles', async () => {
+    select();
+    await flush();
+    socketHandlers['message:new']!({ ...message, text: '<img src=x>\n\nHello' });
+    const body = el('messages').children[0]!.children[1]!.children[1]!;
+    expect(body.children.map(child => child.tagName)).toEqual(['', 'br', '', 'br', '']);
+    expect(body.children.map(child => child.textContent)).toEqual(['<img src=x>', '', '', '', 'Hello']);
 });

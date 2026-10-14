@@ -37,6 +37,7 @@ describe('home page', () => {
         const { html } = await renderHome('user-1');
         expect(listChatRooms).not.toHaveBeenCalled();
         expect(html).toContain('id="room-list"');
+        expect(html).toContain('data-current-user-id="user-1"');
         expect(html).toContain('src="/js/chat-rooms.js"');
     });
 

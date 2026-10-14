@@ -11,6 +11,8 @@
     function setStatus(state) {
         if (status.dataset.state !== state) console.info('[Chat] Connection status', { state });
         status.dataset.state = state;
+        const tone = state === 'connected' ? 'success' : state === 'disconnected' ? 'danger' : 'warning';
+        status.className = `alert alert-${tone} flex-shrink-0 rounded-0 border-0 border-bottom mb-0 py-2 px-4 small`;
         status.textContent = labels[state];
         document.chatClient?.onStatus?.();
         document.chatClient?.onRoomsStatus?.();
