@@ -80,6 +80,7 @@ if (form && validator) {
         submitting = true;
         submit.disabled = true;
         form.setAttribute('aria-busy', 'true');
+        console.info('[Auth] Submitting authentication request', { mode });
         try {
             const response = await fetch(form.action, {
                 method: 'POST',
@@ -88,12 +89,15 @@ if (form && validator) {
                 credentials: 'same-origin',
             });
             if (response.ok && response.redirected) {
+                console.info('[Auth] Authentication succeeded', { mode });
                 window.location.assign(response.url);
                 return;
             }
             const payload = await response.json().catch(() => null);
+            console.warn('[Auth] Authentication request rejected', { mode, status: response.status, code: payload?.error?.code });
             showFormError(getAuthErrorMessage(payload?.error?.code, mode));
         } catch {
+            console.warn('[Auth] Authentication request failed', { mode });
             showFormError('연결할 수 없어요. 인터넷 연결을 확인하고 다시 시도해 주세요.');
         } finally {
             submitting = false;

@@ -36,10 +36,12 @@
         try {
             const result = await client.socket.timeout(10_000).emitWithAck('message:read', { roomId, messageId });
             if (!result.ok) throw new Error(result.error.message);
+            console.info('[Chat] Read progress saved', { roomId, lastReadMessageId: result.lastReadMessageId });
             readThrough.set(roomId, Math.max(readThrough.get(roomId) || 0, result.lastReadMessageId));
             if (room.id === roomId) readStatus.textContent = '';
             succeeded = true;
-        } catch {
+        } catch (error) {
+            console.warn('[Chat] Read progress save failed', { roomId, messageId, error: error.message });
             if (room.id === roomId) readStatus.textContent = '읽음 상태를 저장하지 못했습니다. 다시 불러오기를 눌러 주세요.';
         } finally {
             pendingReads.delete(roomId);
@@ -88,21 +90,26 @@
     async function loadHistory() {
         if (!room) return;
         const current = ++version;
+        const roomId = room.id;
+        console.info('[Chat] Loading message history', { roomId });
         const stickToBottom = !historyLoaded || atBottom();
         historyLoaded = false;
         status.textContent = '메시지를 불러오는 중…';
         retry.hidden = false;
         try {
-            const response = await fetch(`/api/chat-rooms/${encodeURIComponent(room.id)}/messages`, { credentials: 'same-origin', cache: 'no-store' });
+            const response = await fetch(`/api/chat-rooms/${encodeURIComponent(roomId)}/messages`, { credentials: 'same-origin', cache: 'no-store' });
             const data = await response.json();
             if (!response.ok) throw new Error(data.error?.message || '메시지를 불러오지 못했습니다.');
             if (current !== version) return;
             for (const message of data.messages) messages.set(message.id, message);
             historyLoaded = true;
+            console.info('[Chat] Message history loaded', { roomId, count: data.messages.length });
             render(stickToBottom);
             status.textContent = '';
         } catch (error) {
-            if (current === version) status.textContent = error.message;
+            if (current !== version) return;
+            console.warn('[Chat] Message history load failed', { roomId, error: error.message });
+            status.textContent = error.message;
         }
     }
     let wasReady = client.isReady();
@@ -115,6 +122,7 @@
     document.addEventListener('chat:select', (event) => {
         if (room) drafts.set(room.id, input.value);
         room = event.detail;
+        console.info('[Chat] Room selected', { roomId: room.id });
         selectionVersion++;
         historyLoaded = false;
         readThrough.set(room.id, Math.max(readThrough.get(room.id) || 0, room.lastReadMessageId || 0));
@@ -131,12 +139,14 @@
         input.focus();
     });
     client.socket.on('message:new', (message) => {
+        console.info('[Chat] Message received', { roomId: message.roomId, messageId: message.id, senderId: message.senderId });
         if (message.roomId !== room?.id) return;
         const stickToBottom = atBottom();
         messages.set(message.id, message);
         render(stickToBottom);
     });
     client.socket.on('room:read', ({ roomId, lastReadMessageId }) => {
+        console.info('[Chat] Read progress received', { roomId, lastReadMessageId });
         readThrough.set(roomId, Math.max(readThrough.get(roomId) || 0, lastReadMessageId));
     });
     list.addEventListener('scroll', markRead);
@@ -160,9 +170,11 @@
         sending = true;
         updateControls();
         status.textContent = '전송 중…';
+        console.info('[Chat] Sending message', { roomId: selectedRoom });
         try {
             const result = await client.socket.timeout(10_000).emitWithAck('message:send', { roomId: selectedRoom, text });
             if (!result.ok) throw new Error(result.error.message);
+            console.info('[Chat] Message sent', { roomId: selectedRoom, messageId: result.message.id });
             if (drafts.get(selectedRoom) === text) drafts.delete(selectedRoom);
             if (selectionVersion !== selectedVersion) return;
             messages.set(result.message.id, result.message);
@@ -170,6 +182,7 @@
             input.value = '';
             status.textContent = '';
         } catch (error) {
+            console.warn('[Chat] Message send failed', { roomId: selectedRoom, error: error.message });
             if (selectionVersion === selectedVersion) status.textContent = error.message === 'operation has timed out'
                 ? '전송 결과를 확인하지 못했습니다. 다시 보내기 전에 대화방을 다시 열어 확인해 주세요.' : error.message;
         } finally {

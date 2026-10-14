@@ -37,6 +37,7 @@
     async function loadRooms() {
         clearTimeout(refreshTimer);
         const current = ++listVersion;
+        console.info('[Chat] Loading rooms');
         roomList.setAttribute('aria-busy', 'true');
         roomLoading.hidden = false;
         roomStatus.textContent = '';
@@ -75,9 +76,11 @@
             roomCount.textContent = String(rooms.length);
             roomsEmpty.hidden = rooms.length !== 0;
             roomStatus.textContent = '';
+            console.info('[Chat] Rooms loaded', { count: rooms.length });
             return rooms;
         } catch (failure) {
             if (current !== listVersion) return;
+            console.warn('[Chat] Room list load failed', { error: failure.message });
             roomStatus.textContent = `대화방 목록을 불러오지 못했습니다. ${failure.message}`;
             retryRooms.hidden = false;
         } finally {
@@ -174,7 +177,9 @@
                 renderUsers();
                 status.textContent = matches.length ? `${matches.length}명 검색됨 (최대 20명)` : '검색 결과가 없습니다.';
             } catch (failure) {
-                if (current === version) status.textContent = failure.message;
+                if (current !== version || failure.name === 'AbortError') return;
+                console.warn('[Chat] User search failed', { error: failure.message });
+                status.textContent = failure.message;
             }
         }, 250);
     });
@@ -186,13 +191,16 @@
         submit.disabled = true;
         error.textContent = '';
         let createdRoom;
+        console.info('[Chat] Creating room', { participantCount: selected.size });
         try {
             const data = await jsonRequest('/api/chat-rooms', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name: document.getElementById('room-name').value.trim(), participantIds: [...selected.keys()] }),
             });
             createdRoom = data.room;
+            console.info('[Chat] Room created', { roomId: createdRoom.id });
         } catch (failure) {
+            console.warn('[Chat] Room creation failed', { error: failure.message });
             error.textContent = failure.message;
             return;
         } finally {
