@@ -22,7 +22,7 @@
     "start": "node dist/index.js",
     "contract:emit": "prisma contract emit",
     "db:migrate": "prisma db migrate",
-    "deploy": "npm ci --include=dev && npm run build && npm run db:migrate"
+    "deploy": "npm ci --omit=dev && npm run build && npm run db:migrate"
   },
   "dependencies": {
     "@prisma/orm-postgres": "^8.0.0-rc.17",
