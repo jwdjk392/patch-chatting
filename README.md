@@ -32,3 +32,24 @@ If running without compiling (development only), run the following command.
 ```shell
 npm run dev
 ```
+
+## For render
+Node.js
+### Env vars
+```ini
+DATABASE_URL=<YOUR DATABASE CONNECTION URL>
+NODE_ENV=production
+SESSION_SECRET=<YOUR SECRET>
+SITE_NAME=<YOUR SITE NAME>
+```
+
+### Commands
+Start
+```shell
+npm run db:migrate && npm start
+```
+
+Build
+```shell
+npm run deploy
+```
